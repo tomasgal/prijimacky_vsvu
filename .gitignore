@@ -1,0 +1,8 @@
+# Reálne pracovné dáta necommitovať
+real_data/
+produkcia/
+*.tmp
+~$*.xlsx
+
+# Lokálne exporty
+*.bak

@@ -54,7 +54,200 @@ Portfólio_hodnotitel_03
 
 Preto je vhodné pomenúvať hodnotiteľské súbory konzistentne, bez diakritiky a bez medzier. Odporúčaný tvar je napríklad `hodnotitel_01.xlsx`, `hodnotitel_02.xlsx`, prípadne anonymizované označenia `h01.xlsx`, `h02.xlsx`.
 
-## 3. Čo je excelovská tabuľka a prečo je dôležitá
+## 3. Dôležitá poznámka k ceste k priečinku `hodnotitelia/`
+
+Toto je jedna z najdôležitejších technických častí celého riešenia. Power Query, teda excelovský nástroj, ktorý načítava hodnotiteľské súbory do master súboru, si pri použití príkazu `Z priečinka` spravidla zapíše **absolútnu cestu** k priečinku. To znamená, že si nezapamätá iba informáciu „priečinok hodnotitelia vedľa master súboru“, ale celú konkrétnu cestu v počítači.
+
+Príklad absolútnej cesty:
+
+```text
+C:\Users\Admin\Documents\phd prijimacky\hodnotitelia
+```
+
+Takáto cesta funguje na počítači, na ktorom bola vytvorená. Ak však celý balík presuniete do iného priečinka, na USB kľúč, na iný počítač alebo ho pošlete niekomu inému, táto cesta už nemusí existovať. Master súbor sa potom pri obnove údajov môže pokúsiť hľadať hodnotiteľské súbory na pôvodnom mieste, napríklad v priečinku používateľa `Admin`, ktorý na inom počítači vôbec nemusí existovať.
+
+Preto treba rozlišovať dve situácie:
+
+```text
+Lokálny prototyp: treba dávať pozor na cestu k priečinku hodnotitelia.
+Cloudové použitie: ideálne je mať súbory na stabilnom mieste v OneDrive alebo SharePointe.
+```
+
+Pri lokálnom prenášaní prototypu je vhodné použiť konfiguračný hárok a pomenovanú bunku, ktorá obsahuje cestu k priečinku `hodnotitelia/`. Vďaka tomu netreba upravovať Power Query kód pri každom presune. Stačí upraviť jednu bunku v Exceli.
+
+## 4. Optimálne použitie: OneDrive alebo SharePoint
+
+Najpraktickejšie a dlhodobo najčistejšie použitie tohto riešenia je v cloude, teda v organizačnom OneDrive alebo SharePointe. V takom prípade sú `master_template.xlsx` aj priečinok `hodnotitelia/` uložené na stabilnom spoločnom mieste a administrátor má nad nimi kontrolu.
+
+Typická cloudová štruktúra môže vyzerať takto:
+
+```text
+SharePoint / OneDrive
+└── prijimacky_vsvu/
+    ├── master.xlsx
+    └── hodnotitelia/
+        ├── hodnotitel_01.xlsx
+        ├── hodnotitel_02.xlsx
+        └── hodnotitel_03.xlsx
+```
+
+Výhodou cloudového použitia je, že hodnotiteľské súbory možno sprístupniť konkrétnym hodnotiteľom cez webový Excel. Každý hodnotiteľ môže mať prístup iba k svojmu súboru. Administrátor potom v master súbore obnoví údaje a načíta hodnotenia zo všetkých súborov.
+
+Cloudové použitie je vhodnejšie najmä vtedy, ak:
+
+1. na hodnotení pracuje viac ľudí,
+2. súbory sa nemajú posielať e-mailom,
+3. hodnotitelia majú vypĺňať svoje hodnotenia cez web,
+4. treba udržať poriadok v prístupových právach,
+5. treba znížiť riziko, že niekto pracuje so starou verziou súboru.
+
+Lokálny ZIP balík alebo lokálny priečinok je vhodný najmä na prototyp, ukážku alebo jednorazové spracovanie. Pre reálne pracovné použitie je cloud spravidla bezpečnejší a prehľadnejší.
+
+## 5. Konfiguračný hárok a pomenovaná bunka `pFolderHodnotitelia`
+
+Aby master súbor nebol pevne naviazaný na jednu absolútnu cestu v jednom konkrétnom počítači, používa sa konfiguračný hárok. Ide o obyčajný hárok v Exceli, napríklad s názvom:
+
+```text
+Konfiguracia
+```
+
+Na tomto hárku je bunka, v ktorej je uvedená cesta k priečinku s hodnotiteľskými súbormi. Táto bunka je pomenovaná:
+
+```text
+pFolderHodnotitelia
+```
+
+Pomenovaná bunka znamená, že Excel sa na konkrétnu bunku nevie odkazovať iba súradnicami, napríklad `B2`, ale aj menom. Power Query potom nečíta cestu priamo z kódu, ale z tejto pomenovanej bunky.
+
+Príklad obsahu bunky:
+
+```text
+C:\Users\Admin\Documents\phd prijimacky\hodnotitelia\
+```
+
+alebo pri inom umiestnení:
+
+```text
+D:\pracovne\prijimacky_vsvu\hodnotitelia\
+```
+
+Ak sa balík presunie, administrátor nemusí hľadať a upravovať Power Query kód. Stačí zmeniť cestu v konfiguračnej bunke.
+
+## 6. Ako vytvoriť konfiguračný hárok
+
+Ak master súbor ešte nemá konfiguračný hárok, vytvorte ho takto:
+
+1. V master súbore pridajte nový hárok.
+2. Pomenujte ho napríklad:
+
+```text
+Konfiguracia
+```
+
+3. Do bunky `A1` napíšte napríklad:
+
+```text
+Priečinok s hodnotiteľskými súbormi
+```
+
+4. Do bunky `B1` alebo `B2` vložte cestu k priečinku `hodnotitelia/`.
+
+Príklad:
+
+```text
+C:\Users\Admin\Documents\phd prijimacky\hodnotitelia\
+```
+
+Ak chcete, aby sa cesta automaticky odvodzovala od miesta, kde je uložený master súbor, možno použiť vzorec. V slovenskom alebo európskom nastavení Excelu môže vyzerať napríklad takto:
+
+```excel
+=LEFT(CELL("filename";A1);FIND("[";CELL("filename";A1))-1)&"hodnotitelia\"
+```
+
+V niektorých jazykových nastaveniach Excel používa namiesto bodkočiarky čiarku:
+
+```excel
+=LEFT(CELL("filename",A1),FIND("[",CELL("filename",A1))-1)&"hodnotitelia\"
+```
+
+Tento vzorec sa snaží zistiť priečinok, v ktorom je uložený master súbor, a pripojí k nemu podpriečinok `hodnotitelia\`. Prakticky to znamená: „hľadaj priečinok hodnotitelia vedľa master súboru“.
+
+Dôležité: vzorec `CELL("filename")` funguje spoľahlivo až vtedy, keď je master súbor uložený na disku. Ak ide o nový neuložený súbor, Excel ešte nemusí poznať jeho cestu.
+
+## 7. Ako pomenovať bunku s cestou
+
+Keď máte v konfiguračnom hárku bunku s cestou k priečinku `hodnotitelia/`, treba ju pomenovať. Predpokladajme, že cesta je v bunke `B1`.
+
+Postup:
+
+1. Kliknite na bunku `B1`, v ktorej je cesta k priečinku.
+2. Otvorte kartu:
+
+```text
+Vzorce
+```
+
+3. Vyberte:
+
+```text
+Definovať názov
+```
+
+4. Ako názov zadajte:
+
+```text
+pFolderHodnotitelia
+```
+
+5. Potvrďte.
+
+Od tejto chvíle má bunka technický názov `pFolderHodnotitelia`. Tento názov používa Power Query v master súbore. Ak sa cesta zmení, stačí upraviť hodnotu v bunke, nie celý dotaz.
+
+## 8. Ako má Power Query používať konfiguračnú bunku
+
+V Power Query kóde by zdroj nemal byť zapísaný natvrdo takto:
+
+```powerquery
+Zdroj = Folder.Files("C:\Users\Admin\Documents\phd prijimacky\hodnotitelia"),
+```
+
+Takýto zápis znamená, že Power Query bude vždy hľadať presne tento priečinok. Pri prenose súboru na iný počítač sa to môže pokaziť.
+
+Lepší zápis je tento:
+
+```powerquery
+FolderPath = Excel.CurrentWorkbook(){[Name="pFolderHodnotitelia"]}[Content]{0}[Column1],
+Zdroj = Folder.Files(FolderPath),
+```
+
+Tento zápis znamená: „najprv si z Excelu prečítaj hodnotu pomenovanej bunky `pFolderHodnotitelia` a až potom z tejto cesty načítaj súbory“.
+
+Ak už je Power Query dotaz vytvorený a obsahuje absolútnu cestu, možno ju upraviť cez:
+
+```text
+Údaje → Dotazy a pripojenia → dvojklik na dotaz → Domov → Rozšírený editor
+```
+
+V rozšírenom editore treba nahradiť pôvodný riadok so zdrojom dvoma riadkami uvedenými vyššie.
+
+## 9. Ako rozpoznať problém s absolútnou cestou
+
+Problém s absolútnou cestou sa typicky prejaví po presune súborov. Napríklad riešenie fungovalo na jednom počítači, ale na druhom počítači master pri obnove údajov hlási chybu alebo nenačíta hodnotiteľské súbory.
+
+Typické príznaky:
+
+1. Excel hlási, že priečinok neexistuje.
+2. Power Query hľadá cestu začínajúcu na `C:\Users\...`, ktorá patrí inému počítaču alebo inému používateľovi.
+3. Master súbor po presune nenačíta žiadne hodnotiteľské súbory.
+4. V rozšírenom editore je vidieť pevne zapísanú cestu, napríklad:
+
+```text
+C:\Users\Admin\Documents\...
+```
+
+V takom prípade treba buď upraviť cestu priamo v konfiguračnej bunke, alebo upraviť Power Query dotaz tak, aby konfiguračnú bunku používal.
+
+## 10. Čo je excelovská tabuľka a prečo je dôležitá
 
 V tomto riešení nestačí, aby bol zoznam uchádzačov iba obyčajný rozsah buniek. Je potrebné, aby bol zoznam vložený ako **excelovská tabuľka**. V Exceli je tabuľka špeciálny objekt, ktorý má vlastný názov, vlastné stĺpce a vie sa rozširovať alebo spracúvať ako jeden celok.
 
@@ -73,7 +266,7 @@ tblHodnotenie
 
 Ak tabuľka nie je pomenovaná správne, master súbor ju nemusí nájsť. Ak je zoznam uchádzačov iba obyčajný rozsah buniek, Power Query s ním nebude pracovať tak spoľahlivo ako s tabuľkou.
 
-## 4. Ako vytvoriť tabuľku v hodnotiteľskom súbore
+## 11. Ako vytvoriť tabuľku v hodnotiteľskom súbore
 
 Ak pripravujete hodnotiteľský súbor od začiatku, postupujte takto:
 
@@ -106,7 +299,7 @@ Tabuľka obsahuje hlavičky
 
 Od tejto chvíle už nejde iba o obyčajné bunky. Excel vytvoril tabuľku, ktorú vie Power Query spoľahlivo nájsť a spracovať.
 
-## 5. Ako pomenovať tabuľku `tblHodnotenie`
+## 12. Ako pomenovať tabuľku `tblHodnotenie`
 
 Toto je jeden z najdôležitejších krokov. Každý hodnotiteľský súbor musí obsahovať tabuľku s rovnakým názvom:
 
@@ -147,7 +340,7 @@ Názov tabuľky nesmie obsahovať medzery. Odporúčame nepoužívať diakritiku
 
 Ak tabuľku nepomenujete správne, master súbor ju pri obnove údajov nemusí načítať. V takom prípade sa typicky objaví chyba v Power Query alebo v masteri nebudú hodnotenia z daného súboru.
 
-## 6. Ako pripraviť hodnotiteľský súbor zo šablóny
+## 13. Ako pripraviť hodnotiteľský súbor zo šablóny
 
 Najjednoduchší postup je použiť existujúci súbor `hodnotitel_template.xlsx` a skopírovať ho pre každého hodnotiteľa.
 
@@ -176,7 +369,7 @@ Uchádzač | Projekt | Portfólio
 
 Názvy stĺpcov nemeňte. Ak sa zmení napríklad `Portfólio` na `Portfolio`, `Portfolium` alebo `portfólio`, master súbor už nemusí vedieť dáta správne načítať.
 
-## 7. Ako hodnotiteľ vypĺňa body
+## 14. Ako hodnotiteľ vypĺňa body
 
 Hodnotiteľ otvorí svoj súbor, napríklad:
 
@@ -201,7 +394,7 @@ Hodnotiteľ vyberie príslušný počet bodov pre každého uchádzača. Po vypl
 
 Hodnotiteľ nemá meniť názvy stĺpcov, názov tabuľky, mená uchádzačov ani štruktúru hárka. Ak sú v šablóne uzamknuté časti hárka, je to zámerné: má sa tým zabrániť náhodnej zmene zoznamu uchádzačov alebo technickej štruktúry súboru.
 
-## 8. Rozbaľovacie menu 0–5 bodov
+## 15. Rozbaľovacie menu 0–5 bodov
 
 Rozbaľovacie menu sa v Exceli nastavuje cez funkciu:
 
@@ -229,7 +422,7 @@ V niektorých jazykových nastaveniach Excelu sa namiesto bodkočiarky používa
 
 Ak už používate pripravenú šablónu, rozbaľovacie menu by malo byť nastavené vopred. Pri zmene počtu uchádzačov však treba skontrolovať, či sa rozbaľovacie menu vzťahuje aj na všetky nové riadky.
 
-## 9. Čo znamená rozsah buniek a kedy ho treba upraviť
+## 16. Čo znamená rozsah buniek a kedy ho treba upraviť
 
 V Exceli sa mnohé pravidlá nastavujú na konkrétny rozsah buniek. Napríklad ak máte 71 uchádzačov a hodnotiace stĺpce sú `Projekt` a `Portfólio`, rozsah hodnotiacich buniek môže byť:
 
@@ -260,7 +453,7 @@ Toto je dôležité najmä pri dvoch veciach:
 
 Samotný master súbor číta tabuľku `tblHodnotenie`, nie pevný rozsah `B2:C72`. To znamená, že ak je zoznam uchádzačov správne vo vnútri tabuľky, Power Query ho vie načítať. Ale rozbaľovacie menu a ochrana hárka môžu byť stále nastavené na konkrétny rozsah. Preto ich treba pri zmene počtu riadkov skontrolovať.
 
-## 10. Ako skontrolovať alebo upraviť rozsah tabuľky
+## 17. Ako skontrolovať alebo upraviť rozsah tabuľky
 
 Ak pridáte alebo odstránite uchádzačov, treba overiť, že tabuľka `tblHodnotenie` skutočne obsahuje všetky riadky.
 
@@ -290,7 +483,7 @@ Tá sa nachádza na karte `Návrh tabuľky`. Tam možno zadať nový rozsah, nap
 
 Tento príklad znamená, že tabuľka začína v bunke `A1`, končí v bunke `C91` a obsahuje hlavičky aj všetkých uchádzačov.
 
-## 11. Ako upraviť rozsah rozbaľovacieho menu
+## 18. Ako upraviť rozsah rozbaľovacieho menu
 
 Ak pribudnú riadky a nové bunky v stĺpcoch `Projekt` a `Portfólio` nemajú rozbaľovacie menu, treba ho doplniť.
 
@@ -324,7 +517,7 @@ Povoliť: Zoznam
 
 Odporúčanie: po úprave rozsahu vyskúšajte jednu bunku v prvom riadku, jednu v strede a jednu v poslednom riadku. V každej by sa malo zobraziť rozbaľovacie menu s hodnotami `0–5`.
 
-## 12. Ako upraviť ochranu hárka
+## 19. Ako upraviť ochranu hárka
 
 Ak je hárok chránený, hodnotiteľ má upravovať iba bunky s bodmi. Typicky ide o rozsah:
 
@@ -375,13 +568,15 @@ Vybrať odomknuté bunky
 
 Takto hodnotiteľ bude môcť vypĺňať iba určené bunky s bodmi.
 
-## 13. Ako administrátor obnoví master súbor
+## 20. Ako administrátor obnoví master súbor
 
 Administrátor otvorí:
 
 ```text
 master_template.xlsx
 ```
+
+Pred obnovou je vhodné skontrolovať konfiguračný hárok a bunku `pFolderHodnotitelia`. Tá musí ukazovať na priečinok, v ktorom sú uložené hodnotiteľské súbory. Ak je cesta nesprávna, master bude obnovovať nesprávny priečinok alebo zahlási chybu.
 
 Potom použije:
 
@@ -401,7 +596,7 @@ Uchádzač 002 | 5 | 4 | 4 | 5
 
 Ak niektorá bunka obsahuje `null`, znamená to, že príslušné hodnotenie ešte nebolo vyplnené alebo bolo v hodnotiteľskom súbore prázdne.
 
-## 14. Ako pridať nového hodnotiteľa
+## 21. Ako pridať nového hodnotiteľa
 
 Ak pribudne nový hodnotiteľ:
 
@@ -427,7 +622,7 @@ hodnotitelia/
 
 Master automaticky pridá nové stĺpce pre hodnotiteľa podľa názvu súboru.
 
-## 15. Ako vymeniť zoznam uchádzačov
+## 22. Ako vymeniť zoznam uchádzačov
 
 Ak sa má použiť nový zoznam uchádzačov, treba ho vložiť do hodnotiteľskej šablóny tak, aby ostala zachovaná tabuľka `tblHodnotenie`.
 
@@ -443,7 +638,7 @@ Odporúčaný postup:
 
 Ak je zoznam uchádzačov dlhší alebo kratší než pôvodný, nestačí zmeniť iba mená. Treba skontrolovať aj tabuľku, rozbaľovacie menu a ochranu hárka.
 
-## 16. Dôležité pravidlá
+## 23. Dôležité pravidlá
 
 Dodržujte tieto pravidlá:
 
@@ -456,8 +651,9 @@ Dodržujte tieto pravidlá:
 7. Do priečinka `hodnotitelia/` nevkladajte iné pracovné Excel súbory, ktoré nemajú rovnakú štruktúru.
 8. Súbory začínajúce `~$` sú dočasné Excel súbory a master ich ignoruje.
 9. Pri zmene počtu uchádzačov skontrolujte veľkosť tabuľky, rozbaľovacie menu aj ochranu hárka.
+10. Pri prenose balíka medzi počítačmi skontrolujte konfiguračnú bunku `pFolderHodnotitelia`, pretože Power Query môže mať problém s pôvodnou absolútnou cestou.
 
-## 17. Verejný repozitár a ochrana dát
+## 24. Verejný repozitár a ochrana dát
 
 Tento repozitár má obsahovať iba anonymizované alebo vzorové dáta. Do verejného repozitára nepatria:
 
@@ -469,11 +665,15 @@ Tento repozitár má obsahovať iba anonymizované alebo vzorové dáta. Do vere
 
 Reálne pracovné dáta ukladajte mimo verejný GitHub repozitár, napríklad do interného úložiska organizácie alebo do chráneného SharePoint/OneDrive priestoru.
 
-## 18. Najčastejšie problémy
+## 25. Najčastejšie problémy
 
 ### Master nenačítal nový hodnotiteľský súbor
 
 Skontrolujte, či je nový súbor uložený v priečinku `hodnotitelia/`, či má príponu `.xlsx` a či obsahuje tabuľku `tblHodnotenie`.
+
+### Master po presune hľadá súbory v nesprávnom priečinku
+
+Toto je pravdepodobne problém absolútnej cesty. Otvorte konfiguračný hárok a skontrolujte bunku `pFolderHodnotitelia`. Musí obsahovať aktuálnu cestu k priečinku `hodnotitelia/`. Ak Power Query stále používa starú cestu, treba skontrolovať Rozšírený editor a overiť, že zdroj používa `FolderPath`, nie pevne zapísanú cestu.
 
 ### Master hlási, že nenašiel `tblHodnotenie`
 
@@ -503,7 +703,7 @@ Skontrolujte, či nové riadky patria do tabuľky `tblHodnotenie`. Nestačí, ab
 
 Najčastejšie príčiny sú zmenený názov tabuľky, zmenené názvy stĺpcov, nesprávna cesta k priečinku `hodnotitelia/` alebo vložený súbor s inou štruktúrou.
 
-## 19. Poznámka k jednoznačnej identifikácii uchádzačov
+## 26. Poznámka k jednoznačnej identifikácii uchádzačov
 
 V základnej verzii sa uchádzači identifikujú podľa textu v stĺpci `Uchádzač`. To je jednoduché, ale nie úplne bezpečné, ak sa v zozname vyskytnú dvaja uchádzači s rovnakým menom alebo ak sa meno niekde zapíše mierne odlišne.
 
@@ -521,7 +721,7 @@ ID_uchádzača | Uchádzač | Projekt | Portfólio
 
 Táto verzia je robustnejšia, ale vyžaduje aj úpravu Power Query dotazu v master súbore.
 
-## 20. Odporúčaný pracovný postup
+## 27. Odporúčaný pracovný postup
 
 Pre bežné použitie odporúčame tento postup:
 
@@ -530,14 +730,17 @@ Pre bežné použitie odporúčame tento postup:
 3. Skontrolovať, že tabuľka obsahuje všetkých uchádzačov.
 4. Skontrolovať rozbaľovacie menu `0–5` v stĺpcoch `Projekt` a `Portfólio`.
 5. Skontrolovať ochranu hárka a odomknuté bunky na vypĺňanie.
-6. Skopírovať template pre každého hodnotiteľa.
-7. Každému hodnotiteľovi prideliť jeho vlastný súbor.
-8. Po vyplnení všetky súbory uložiť do priečinka `hodnotitelia/`.
-9. Otvoriť `master_template.xlsx`.
-10. Použiť `Údaje → Obnoviť všetko`.
-11. Skontrolovať výslednú tabuľku.
-12. Až z výslednej tabuľky vypočítavať súčty, priemery, poradie alebo rozhodnutie o postupe.
+6. Skontrolovať konfiguračný hárok v master súbore a bunku `pFolderHodnotitelia`.
+7. Skopírovať template pre každého hodnotiteľa.
+8. Každému hodnotiteľovi prideliť jeho vlastný súbor.
+9. Po vyplnení všetky súbory uložiť do priečinka `hodnotitelia/`.
+10. Otvoriť `master_template.xlsx`.
+11. Použiť `Údaje → Obnoviť všetko`.
+12. Skontrolovať výslednú tabuľku.
+13. Až z výslednej tabuľky vypočítavať súčty, priemery, poradie alebo rozhodnutie o postupe.
 
-## 21. Krátke zhrnutie pre administrátora
+## 28. Krátke zhrnutie pre administrátora
 
-Najdôležitejšie je ustrážiť tri veci: hodnotiteľské súbory musia byť v správnom priečinku, každá hodnotiteľská tabuľka sa musí volať `tblHodnotenie` a stĺpce musia mať presné názvy `Uchádzač`, `Projekt`, `Portfólio`. Ak sa mení počet uchádzačov, treba okrem samotných mien skontrolovať aj veľkosť tabuľky, rozbaľovacie menu a ochranu hárka. Potom stačí v master súbore spustiť `Údaje → Obnoviť všetko` a výsledky sa načítajú do spoločnej tabuľky.
+Najdôležitejšie je ustrážiť štyri veci. Po prvé, hodnotiteľské súbory musia byť v správnom priečinku. Po druhé, každá hodnotiteľská tabuľka sa musí volať `tblHodnotenie`. Po tretie, stĺpce musia mať presné názvy `Uchádzač`, `Projekt`, `Portfólio`. Po štvrté, master súbor musí vedieť, kde je priečinok `hodnotitelia/`; preto treba venovať pozornosť konfiguračnému hárku a pomenovanej bunke `pFolderHodnotitelia`.
+
+Ak sa mení počet uchádzačov, treba okrem samotných mien skontrolovať aj veľkosť tabuľky, rozbaľovacie menu a ochranu hárka. Ak sa balík presúva medzi počítačmi, treba skontrolovať cestu k priečinku s hodnotiteľskými súbormi. Pre stabilné pracovné použitie je vhodnejšie držať celé riešenie v cloude, najmä v SharePointe alebo OneDrive, a lokálnu verziu používať najmä na prototypovanie alebo demonštráciu.

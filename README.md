@@ -1,59 +1,108 @@
-# Hodnotenie uchádzačov – Excel/Power Query prototyp
+# Hodnotenie uchádzačov – Excel/Power Query nástroje
 
-Tento repozitár obsahuje anonymizovaný prototyp zberu hodnotení uchádzačov.
+Tento repozitár obsahuje pracovné podklady pre zber a spracovanie hodnotení uchádzačov v Exceli pomocou Power Query.
 
-## Princíp
+Riešenie je postavené na jednoduchom princípe: každý hodnotiteľ vypĺňa samostatný Excel súbor, všetky hodnotiteľské súbory sú uložené v jednom priečinku a master súbor ich následne načíta do spoločnej tabuľky.
 
-Každý hodnotiteľ má vlastný Excel súbor v podadresári `hodnotitelia/`. V hodnotiteľskom súbore vypĺňa iba stĺpce:
+## Aktuálna verzia: VIK_2026-27
+
+Aktuálna verzia pracuje so štyrmi hodnotiacimi kritériami:
 
 - `Projekt`
 - `Portfólio`
+- `Motivačný list`
+- `Pohovor`
 
-Hodnoty sa vyberajú z rozbaľovacieho zoznamu `0–5`.
+Každé kritérium sa hodnotí bodmi `0–5`. Hodnotiteľské bunky môžu zostať prázdne; Power Query ich vo výstupe zachová ako prázdne bunky. Reálne zadaná hodnota `0` zostáva vo výstupe ako `0`, takže sa nerozlišovanie medzi prázdnou bunkou a nulovým hodnotením nestráca.
 
-Master súbor následne cez Power Query načíta všetky hodnotiteľské súbory z podadresára `hodnotitelia/` a vytvorí agregovanú tabuľku, kde je každý uchádzač v jednom riadku a hodnotenia od jednotlivých hodnotiteľov sú v samostatných stĺpcoch.
+Výstupný master má jedného uchádzača na jednom riadku. Uchádzači sú zoradení podľa `Priezvisko`, potom `Meno`. Hodnotiace stĺpce sú usporiadané po blokoch v poradí `Projekt`, `Portfólio`, `Motivačný list`, `Pohovor`; vnútri každého bloku sú hodnotitelia zoradení abecedne podľa názvu súboru.
 
-## Súbory
+Hlavný M-kód pre túto verziu je uložený v:
 
 ```text
-master_template.xlsx
-hodnotitel_template.xlsx
-hodnotitelia/
-  hodnotitel_01_sample.xlsx
-  hodnotitel_02_sample.xlsx
-docs/
-  power_query_m_code.md
+docs/power_query_m_code_vik_2026_27.md
 ```
 
-## Hodnotiteľský súbor
+## Štruktúra hodnotiteľského súboru
 
-Každý hodnotiteľský súbor musí obsahovať tabuľku s názvom:
+Každý hodnotiteľský súbor musí obsahovať Excel tabuľku s názvom:
 
 ```text
 tblHodnotenie
 ```
 
-a presné názvy stĺpcov:
+Tabuľka musí mať presné názvy stĺpcov:
 
 ```text
-Uchádzač | Projekt | Portfólio
+Ateliér | Priezvisko | Meno | kód | Projekt | Portfólio | Motivačný list | Pohovor
 ```
 
-Názov súboru sa používa ako identifikátor hodnotiteľa. Napríklad súbor `hodnotitel_03.xlsx` vytvorí v masteri stĺpce:
+Názov súboru sa používa ako identifikátor hodnotiteľa. Napríklad súbor:
 
 ```text
-Projekt_hodnotitel_03
-Portfólio_hodnotitel_03
+Bálik.xlsx
 ```
 
-## Pridanie nového hodnotiteľa
+vytvorí vo výstupe stĺpce:
 
-1. Skopírujte `hodnotitel_template.xlsx`.
-2. Premenujte ho napríklad na `hodnotitel_03.xlsx`.
-3. Uložte ho do podadresára `hodnotitelia/`.
-4. Hodnotiteľ vyplní stĺpce `Projekt` a `Portfólio`.
-5. V master súbore použite `Údaje → Obnoviť všetko`.
+```text
+Projekt_Bálik
+Portfólio_Bálik
+Motivačný list_Bálik
+Pohovor_Bálik
+```
+
+## Odporúčaná štruktúra priečinkov
+
+```text
+VIK_2026-27/
+├── VIK_2026-27.xlsx
+└── hodnotitelia/
+    ├── Bálik.xlsx
+    ├── Benčík.xlsx
+    └── ...
+```
+
+Master súbor `VIK_2026-27.xlsx` má mať konfiguračný hárok s pomenovanou bunkou:
+
+```text
+pFolderHodnotitelia
+```
+
+Táto bunka obsahuje cestu k priečinku `hodnotitelia`. Power Query potom nemusí mať cestu k priečinku zapísanú napevno v M-kóde.
+
+## Pridanie alebo výmena hodnotiteľského súboru
+
+Hodnotiteľský súbor sa uloží do priečinka `hodnotitelia/`. Po otvorení master súboru stačí použiť:
+
+```text
+Údaje → Obnoviť všetko
+```
+
+Power Query načíta aktuálny obsah priečinka a z každého `.xlsx` súboru použije tabuľku `tblHodnotenie`. Dočasné Excel súbory začínajúce na `~$` sa ignorujú.
+
+## Dokumentácia
+
+V repozitári sú dve hlavné verzie Power Query kódu:
+
+```text
+docs/power_query_m_code.md
+```
+
+Staršia verzia prototypu s menším počtom hodnotiacich kritérií.
+
+```text
+docs/power_query_m_code_vik_2026_27.md
+```
+
+Aktuálna verzia pre master `VIK_2026-27.xlsx`, so štyrmi kritériami a stabilným spracovaním prázdnych buniek.
+
+Používateľský návod je v:
+
+```text
+docs/navod_na_pouzitie.md
+```
 
 ## Dôležité upozornenie
 
-Do verejného repozitára nedávajte reálne mená uchádzačov, hodnotiteľov ani reálne bodové hodnotenia. Tento balík používa anonymizované vzorové dáta.
+Do verejného repozitára nedávajte reálne mená uchádzačov, hodnotiteľov ani reálne bodové hodnotenia. Tento repozitár má slúžiť ako technická dokumentácia a šablóna pracovného postupu, nie ako úložisko produkčných osobných údajov.

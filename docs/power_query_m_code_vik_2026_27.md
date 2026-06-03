@@ -8,12 +8,20 @@ Predpoklady:
 - hodnotiteľské súbory sú vo formáte `.xlsx`,
 - každý hodnotiteľský súbor obsahuje Excel tabuľku s názvom `tblHodnotenie`,
 - tabuľka `tblHodnotenie` má stĺpce `Ateliér`, `Priezvisko`, `Meno`, `kód`, `Projekt`, `Portfólio`, `Motivačný list`, `Pohovor`,
-- názov hodnotiteľa sa berie z názvu súboru, napr. `Bálik.xlsx` → `Bálik`,
+- názov hodnotiteľa sa berie z názvu súboru, napr. `hodnotitel_01.xlsx` → `hodnotitel_01`,
 - prázdne hodnotiace bunky sa vo výstupe zachovajú ako prázdne bunky,
 - reálne zadané hodnotenie `0` zostane vo výstupe ako `0`,
 - každý uchádzač má vo výstupe jeden riadok,
 - riadky sú zoradené podľa `Priezvisko`, potom `Meno`,
 - výstupné hodnotiace stĺpce sú zoradené podľa kritérií v poradí `Projekt`, `Portfólio`, `Motivačný list`, `Pohovor`; vnútri každého kritéria sú hodnotitelia zoradení abecedne podľa názvu súboru.
+
+Odporúčané anonymizované názvy hodnotiteľských súborov:
+
+```text
+hodnotitel_01.xlsx
+hodnotitel_02.xlsx
+hodnotitel_03.xlsx
+```
 
 Kód vložte do Power Query cez `Domov → Rozšírený editor`.
 
@@ -89,14 +97,14 @@ let
             }
         ),
 
-    // Názov súboru sa použije ako názov hodnotiteľa.
+    // Názov súboru sa použije ako anonymizovaný identifikátor hodnotiteľa.
     #"Premenovaný súbor na hodnotiteľa" =
         Table.RenameColumns(
             #"Rozbalené hodnotenia",
             {{"Name", "Hodnotiteľ"}}
         ),
 
-    // Odstráni sa prípona .xlsx, aby hodnotiteľ nebol pomenovaný napr. Bálik.xlsx, ale iba Bálik.
+    // Odstráni sa prípona .xlsx, napr. hodnotitel_01.xlsx sa zmení na hodnotitel_01.
     #"Odstránená prípona xlsx" =
         Table.ReplaceValue(
             #"Premenovaný súbor na hodnotiteľa",
@@ -156,7 +164,7 @@ let
             Int64.Type
         ),
 
-    // Výsledný názov stĺpca má tvar Kritérium_Hodnotiteľ, napr. Projekt_Bálik.
+    // Výsledný názov stĺpca má tvar Kritérium_Hodnotiteľ, napr. Projekt_hodnotitel_01.
     #"Pridaný názov výstupného stĺpca" =
         Table.AddColumn(
             #"Poradie kritérií",
@@ -166,7 +174,7 @@ let
         ),
 
     // Zoradenie ešte pred pivotom určí poradie výsledných hodnotiacich stĺpcov.
-    // Najprv ide poradie kritérií, vnútri kritéria hodnotitelia abecedne.
+    // Najprv ide poradie kritérií, vnútri kritéria hodnotitelia abecedne podľa názvu súboru.
     #"Zoradené pred pivotom" =
         Table.Sort(
             #"Pridaný názov výstupného stĺpca",

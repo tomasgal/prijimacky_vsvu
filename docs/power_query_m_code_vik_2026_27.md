@@ -1,6 +1,6 @@
 # Power Query M-kód pre master VIK_2026-27
 
-Táto verzia je určená pre master súbor `VIK_2026-27.xlsx`.
+Táto verzia je určená pre master súbor ktorý obsahuje štyri kritéria hodnotenia.
 
 Predpoklady:
 

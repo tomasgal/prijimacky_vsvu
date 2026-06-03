@@ -79,7 +79,3 @@ Táto bunka obsahuje cestu k priečinku `hodnotitelia`.
 docs/power_query_m_code_vik_2026_27.md
 docs/navod_na_pouzitie.md
 ```
-
-## Dôležité upozornenie
-
-Do verejného repozitára nedávajte reálne mená uchádzačov, hodnotiteľov ani reálne bodové hodnotenia. Repozitár má slúžiť ako technická dokumentácia a šablóna pracovného postupu.

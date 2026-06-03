@@ -23,9 +23,24 @@ Aktuálny M-kód je v:
 docs/power_query_m_code_vik_2026_27.md
 ```
 
+## Prvá verzia: dvojkritériový prototyp
+
+Ako prvá vznikla jednoduchšia dvojkritériová verzia prototypu. Tá pracovala iba s kritériami:
+
+- `Projekt`
+- `Portfólio`
+
+Táto verzia zostáva v repozitári ako dokumentovaný historický prototyp a môže byť užitočná v prípadoch, keď stačí jednoduchší zber hodnotení s dvomi hodnotiacimi stĺpcami.
+
+Dokumentácia a Power Query skript pre dvojkritériovú verziu sú v:
+
+```text
+docs/power_query_m_code.md
+```
+
 ## Štruktúra hodnotiteľského súboru
 
-Každý hodnotiteľský súbor musí obsahovať Excel tabuľku s názvom:
+Každý hodnotiteľský súbor v aktuálnej verzii musí obsahovať Excel tabuľku s názvom:
 
 ```text
 tblHodnotenie
@@ -77,5 +92,10 @@ Táto bunka obsahuje cestu k priečinku `hodnotitelia`.
 
 ```text
 docs/power_query_m_code_vik_2026_27.md
+docs/power_query_m_code.md
 docs/navod_na_pouzitie.md
 ```
+
+## Dôležité upozornenie
+
+Do verejného repozitára nedávajte reálne mená uchádzačov, hodnotiteľov ani reálne bodové hodnotenia. Repozitár má slúžiť ako technická dokumentácia a šablóna pracovného postupu.

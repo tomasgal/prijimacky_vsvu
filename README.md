@@ -6,4 +6,4 @@ Každý hodnotiteľ vypĺňa samostatný Excel súbor. Všetky hodnotiteľské s
 
 ## Aktuálna verzia: VIK_2026-27
 
-Aktuálna verzia pracuje so štyrmi hodnotiacimi kritériami: `Projekt`, `Portfólio`,
+Aktuálna verzia pracuje so štyrmi hodnotiacimi kritéri

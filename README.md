@@ -9,5 +9,4 @@ Každý hodnotiteľ vypĺňa samostatný Excel súbor. Všetky hodnotiteľské s
 Aktuálna verzia pracuje so štyrmi hodnotiacimi kritériami:
 
 - `Projekt`
-- `Portfólio`
-- `Motivačný list
+- `Port

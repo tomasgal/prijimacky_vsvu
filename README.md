@@ -4,6 +4,7 @@ Tento repozitár obsahuje pracovné podklady pre zber a spracovanie hodnotení u
 
 Každý hodnotiteľ vypĺňa samostatný Excel súbor. Všetky hodnotiteľské súbory sú uložené v priečinku `hodnotitelia/` a master súbor ich cez Power Query načíta do spoločnej tabuľky.
 
-## Aktuálna verzia: VIK_2026-27
+## Rýchla orientácia
 
-Aktuálna verzia pracuje so štyrmi hodnotiacimi kritéri
+- [Aktuálna verzia: VIK_2026-27](#aktuálna-verzia-vik_2026-27)
+- [Dokumentácia

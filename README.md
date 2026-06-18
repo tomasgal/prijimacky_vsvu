@@ -10,7 +10,4 @@ Aktuálna verzia pracuje so štyrmi hodnotiacimi kritériami:
 
 - `Projekt`
 - `Portfólio`
-- `Motivačný list`
-- `Pohovor`
-
-Každé kritérium sa hodnotí bodmi `0–5`. Pr
+- `Motivačný list

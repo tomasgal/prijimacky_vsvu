@@ -251,3 +251,9 @@ hodnotitel_03.xlsx
 ```
 
 Pred každým commitom treba skontrolovať, či sa do repozitára nedostal produkčný `.xlsx` súbor alebo dočasný Excel súbor začínajúci na `~$`.
+
+## Poznámka k zdieľaniu cez OneDrive
+
+Ak sa pracovné dokumenty zdieľajú prostredníctvom infraštruktúry Microsoft OneDrive, musia byť uložené v priečinku, ktorý je skutočne synchronizovaný alebo spravovaný cez OneDrive. Nestačí, aby sa súbory nachádzali na ľubovoľnom mieste lokálneho disku.
+
+Prakticky to znamená, že master zošit aj priečinok `hodnotitelia/` majú byť uložené v príslušnom podadresári OneDrive. Až potom ich možno spoľahlivo zdieľať, synchronizovať a spravovať cez OneDrive.
